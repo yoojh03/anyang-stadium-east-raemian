@@ -102,64 +102,82 @@
                 <div id="form-tax-transfer" class="tax-form space-y-3">
                     <div>
                         <label class="block text-xs text-gray-700 font-medium mb-1">양도 당시 물건 종류</label>
-                        <select class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
-                            <option>일반 주택 / 관리처분인가 전 철거 전 주택</option>
-                            <option>관리처분인가 이후 조합원 입주권</option>
+                        <select id="transfer-type" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <option value="normal">일반 주택 / 관리처분인가 전 철거 전 주택</option>
+                            <option value="right">관리처분인가 이후 조합원 입주권</option>
                         </select>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs text-gray-700 font-medium mb-1">양도가액 (만원)</label>
-                            <input type="number" placeholder="예: 85000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <input type="number" id="transfer-price" placeholder="예: 85000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-700 font-medium mb-1">취득가액 (만원)</label>
-                            <input type="number" placeholder="예: 50000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <input type="number" id="acquisition-price" placeholder="예: 50000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs text-gray-700 font-medium mb-1">필요경비 (만원)</label>
-                            <input type="number" placeholder="예: 500" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <input type="number" id="transfer-expense" placeholder="예: 500" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-700 font-medium mb-1">보유 기간 (년)</label>
-                            <input type="number" placeholder="예: 3" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <input type="number" id="holding-years" placeholder="예: 3" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-700 font-medium mb-1">보유 주택 수 (다주택자 포함)</label>
-                        <select class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
-                            <option>1세대 1주택 (비과세 또는 기본세율)</option>
-                            <option>2주택자 (기본세율 + 20%p 중과)</option>
-                            <option>3주택 이상 (기본세율 + 30%p 중과)</option>
+                        <select id="house-count" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <option value="1">1세대 1주택 비과세 (보유 2년 이상)</option>
+                            <option value="2">2주택자 (기본세율 + 20%p 중과)</option>
+                            <option value="3">3주택 이상 (기본세율 + 30%p 중과)</option>
                         </select>
                     </div>
-                    <button onclick="alert('양도소득세 산출이 완료되었습니다.')" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">양도소득세 즉시 계산하기</button>
+                    <button onclick="calculateTransferTax()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">양도소득세 즉시 계산하기</button>
+                    
+                    <!-- 양도세 결과 출력 박스 (법적 면책 문구 추가) -->
+                    <div id="result-transfer" style="display: none;" class="bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-2 text-xs text-amber-900 shadow-sm mt-3">
+                        <div class="font-bold border-b border-amber-200 pb-1.5 text-amber-900 text-sm">🧮 양도소득세 산출 결과</div>
+                        <div id="transfer-result-text" class="space-y-1 pt-1 text-xs leading-relaxed"></div>
+                        <div class="mt-2 pt-2 border-t border-amber-200 text-[11px] text-amber-800 font-medium leading-normal">
+                            ⚠️ <strong>법적 면책 및 유의 안내:</strong> 본 산출 결과는 개인별 세대 구성, 비과세 요건 충족 여부 등에 따라 실제 세액과 차이가 날 수 있는 단순 참고용 간이 계산입니다. 정확한 세금 확정을 위해 반드시 <strong>전문 세무사</strong>의 최종 검토와 조언을 받으시기 바랍니다.
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 취득세 계산 폼 -->
                 <div id="form-tax-acquisition" class="tax-form space-y-3 hidden">
                     <div>
                         <label class="block text-xs text-gray-700 font-medium mb-1">취득 물건 상태</label>
-                        <select class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
-                            <option>관리처분인가 전 (주택분 취득세 1~3%)</option>
-                            <option>관리처분인가 후 입주권 (토지분 취득세 4.6%)</option>
+                        <select id="acq-type" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <option value="housing">관리처분인가 전 (주택분 취득세 1~3%)</option>
+                            <option value="land">관리처분인가 후 입주권 (토지분 취득세 4.6%)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-700 font-medium mb-1">취득 가액 (만원)</label>
-                        <input type="number" placeholder="예: 60000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                        <input type="number" id="acq-price" placeholder="예: 60000" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-700 font-medium mb-1">조정대상지역 여부 및 주택 수</label>
-                        <select class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
-                            <option>1주택 또는 일시적 2주택</option>
-                            <option>조정지역 2주택 / 비조정 3주택 (8%)</option>
-                            <option>조정지역 3주택 이상 / 법인 (12%)</option>
+                        <select id="acq-houses" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-xs text-gray-900">
+                            <option value="1">1주택 또는 일시적 2주택 (1~3%)</option>
+                            <option value="2">조정지역 2주택 / 비조정 3주택 (8%)</option>
+                            <option value="3">조정지역 3주택 이상 / 법인 (12%)</option>
                         </select>
                     </div>
-                    <button onclick="alert('취득세 산출이 완료되었습니다.')" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">취득세 즉시 계산하기</button>
+                    <button onclick="calculateAcquisitionTax()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">취득세 즉시 계산하기</button>
+
+                    <!-- 취득세 결과 출력 박스 (법적 면책 문구 추가) -->
+                    <div id="result-acquisition" style="display: none;" class="bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-2 text-xs text-amber-900 shadow-sm mt-3">
+                        <div class="font-bold border-b border-amber-200 pb-1.5 text-amber-900 text-sm">🧮 취득세 산출 결과</div>
+                        <div id="acq-result-text" class="space-y-1 pt-1 text-xs leading-relaxed"></div>
+                        <div class="mt-2 pt-2 border-t border-amber-200 text-[11px] text-amber-800 font-medium leading-normal">
+                            ⚠️ <strong>법적 면책 및 유의 안내:</strong> 본 취득세 산출 결과는 개별 권리 분석 및 주택 수 산정에 따라 달라질 수 있는 참고용입니다. 계약 및 등기 전 반드시 <strong>전문 법무사 또는 세무사</strong>의 확인과 조언을 거쳐 진행하시기 바랍니다.
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -264,12 +282,17 @@
     </nav>
 
     <script>
-        const STORAGE_KEY_QAS = 'hwamok_shared_qas_dongan_v2'; // 버전 업그레이드로 기존 중복 데이터 초기화 및 신규 반영
+        const STORAGE_KEY_QAS = 'hwamok_shared_qas_dongan_v6';
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             window.scrollTo(0, 0);
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn text-gray-500 flex flex-col items-center gap-1");
+            if(event && event.currentTarget) {
+                event.currentTarget.className = "tab-btn text-amber-600 flex flex-col items-center gap-1 font-semibold";
+            }
         }
 
         function switchTaxTab(type) {
@@ -284,6 +307,110 @@
                 document.getElementById('btn-tax-transfer').className = 'py-2 text-xs font-bold rounded-lg text-gray-600 transition';
                 document.getElementById('btn-tax-acquisition').className = 'py-2 text-xs font-bold rounded-lg bg-white text-amber-600 shadow-sm transition';
             }
+        }
+
+        function calculateTransferTax() {
+            const transferPrice = parseFloat(document.getElementById('transfer-price').value) || 0;
+            const acquisitionPrice = parseFloat(document.getElementById('acquisition-price').value) || 0;
+            const expense = parseFloat(document.getElementById('transfer-expense').value) || 0;
+            const years = parseInt(document.getElementById('holding-years').value) || 0;
+            const houseCount = document.getElementById('house-count').value;
+
+            if (transferPrice <= 0 || acquisitionPrice <= 0) {
+                alert("양도가액과 취득가액을 올바르게 입력해주세요.");
+                return;
+            }
+
+            const gain = transferPrice - acquisitionPrice - expense;
+            const resBox = document.getElementById('result-transfer');
+            const resText = document.getElementById('transfer-result-text');
+
+            if (gain <= 0) {
+                resBox.style.display = 'block';
+                resText.innerHTML = `양도차익이 발생하지 않았거나 손실 구간입니다. (과세표준: 0원)`;
+                return;
+            }
+
+            if (houseCount === '1' && years >= 2) {
+                resBox.style.display = 'block';
+                resText.innerHTML = `
+                    <div>• 양도차익: <strong>${gain.toLocaleString()} 만원</strong></div>
+                    <div>• 판정 결과: <strong class="text-emerald-600 font-bold">1세대 1주택 비과세 대상 (보유기간 2년 이상 충족)</strong></div>
+                    <div>• 예상 양도소득세: <strong class="text-blue-600 font-bold">0 원 (비과세)</strong></div>
+                    <div>• 총 납부할 세액: <strong class="text-blue-700 font-bold">0 원</strong></div>
+                `;
+                return;
+            }
+
+            let longTermDeduction = 0;
+            if (houseCount === '1' && years >= 3) {
+                longTermDeduction = Math.min(gain * 0.08 * years, gain * 0.8);
+            } else if (years >= 3 && houseCount === '1') {
+                longTermDeduction = gain * 0.02 * years;
+            }
+
+            const taxableIncome = Math.max(0, gain - longTermDeduction);
+            
+            let baseTax = 0;
+            if (taxableIncome <= 1200) baseTax = taxableIncome * 0.06;
+            else if (taxableIncome <= 4600) baseTax = taxableIncome * 0.15 - 108;
+            else if (taxableIncome <= 8800) baseTax = taxableIncome * 0.24 - 522;
+            else if (taxableIncome <= 15000) baseTax = taxableIncome * 0.35 - 1490;
+            else if (taxableIncome <= 30000) baseTax = taxableIncome * 0.38 - 1940;
+            else if (taxableIncome <= 50000) baseTax = taxableIncome * 0.40 - 2540;
+            else if (taxableIncome <= 100000) baseTax = taxableIncome * 0.42 - 3540;
+            else baseTax = taxableIncome * 0.45 - 6540;
+
+            let surchargeRate = 0;
+            if (houseCount === '2') surchargeRate = 0.20;
+            else if (houseCount === '3') surchargeRate = 0.30;
+
+            let finalTax = baseTax + (taxableIncome * surchargeRate);
+            let localTax = finalTax * 0.1;
+
+            resBox.style.display = 'block';
+            resText.innerHTML = `
+                <div>• 양도차익: <strong>${gain.toLocaleString()} 만원</strong></div>
+                <div>• 과세표준: <strong>${Math.round(taxableIncome).toLocaleString()} 만원</strong></div>
+                <div>• 예상 양도소득세: <strong class="text-red-600 font-bold">${Math.round(finalTax).toLocaleString()} 만원</strong></div>
+                <div>• 지방소득세(10% 포함 총 납부액): <strong class="text-red-700 font-bold">${Math.round(finalTax + localTax).toLocaleString()} 만원</strong></div>
+            `;
+        }
+
+        function calculateAcquisitionTax() {
+            const acqPrice = parseFloat(document.getElementById('acq-price').value) || 0;
+            const acqType = document.getElementById('acq-type').value;
+            const houses = document.getElementById('acq-houses').value;
+
+            if (acqPrice <= 0) {
+                alert("취득가액을 올바르게 입력해주세요.");
+                return;
+            }
+
+            let taxRate = 0.01;
+            if (acqType === 'land') {
+                taxRate = 0.046;
+            } else {
+                if (houses === '2') taxRate = 0.08;
+                else if (houses === '3') taxRate = 0.12;
+                else {
+                    if (acqPrice <= 60000) taxRate = 0.01;
+                    else if (acqPrice >= 90000) taxRate = 0.03;
+                    else taxRate = ((acqPrice / 10000 - 600) / 300) * 0.02 + 0.01;
+                }
+            }
+
+            const calculatedTax = acqPrice * taxRate;
+            const localEducationTax = calculatedTax * 0.1;
+            const resBox = document.getElementById('result-acquisition');
+            const resText = document.getElementById('acq-result-text');
+
+            resBox.style.display = 'block';
+            resText.innerHTML = `
+                <div>• 적용 취득세율: <strong>${(taxRate * 100).toFixed(2)}%</strong></div>
+                <div>• 산출 취득세액: <strong class="text-red-600 font-bold">${Math.round(calculatedTax).toLocaleString()} 만원</strong></div>
+                <div>• 부대세 포함 총 예상 취득세: <strong class="text-red-700 font-bold">${Math.round(calculatedTax + localEducationTax).toLocaleString()} 만원</strong></div>
+            `;
         }
 
         function verifyAdminPassword() {
@@ -308,7 +435,6 @@
                 let qas = JSON.parse(localStorage.getItem(STORAGE_KEY_QAS));
                 if(!qas || qas.length === 0) {
                     qas = [];
-                    // 102개 핵심 도정법 및 조합원 실무 Q&A 맞춤형 데이터 구성
                     const qaDataTemplates = [
                         {title: "투기과열지구 내 재개발 조합원 지위 양도 제한 시점", content: "관리처분계획 인가 후에는 원칙적으로 조합원 지위 양도가 제한됩니다. 단, 착공 후 3년 이상 미착공, 1세대 1주택자 10년 보유 및 5년 거주 등 도정법 예외 사유에 해당할 경우 양도가 허용됩니다."},
                         {title: "조합설립인가 이후 매수 시 입주권 승계 여부", content: "재개발 사업은 조합설립인가 후에도 관리처분인가 전까지 매매를 통해 조합원 지위(입주권) 승계가 가능합니다. 단, 지분 쪼개기 물건은 현금청산 대상이 되므로 주의가 필요합니다."},
@@ -327,7 +453,7 @@
                         let baseObj = qaDataTemplates[templateIndex];
                         qas.push({
                             title: `[핵심] ${baseObj.title} (가이드 #${i})`,
-                            content: `${baseObj.content}\n\n💡 실무 팁: 안양운동장 동측(래미안 하이스티지) 조합원 및 매수 예정자분들께서는 본 계약 전 인덕원부동산(031-424-5005) 또는 화목부동산으로 문의해 주시면 정확한 개별 물건 분석을 도와드립니다.`
+                            content: `${baseObj.content}\n\n💡 실무 팁: 안양운동장 동측(래미안 하이스티지) 조합원 및 매수 예정자분들께서는 본 계약 전 인덕원부동산(031-424-5005) 또는 화목부동산(031-385-5600)으로 문의해 주시면 정확한 개별 물건 분석을 도와드립니다.`
                         });
                     }
                     localStorage.setItem(STORAGE_KEY_QAS, JSON.stringify(qas));
